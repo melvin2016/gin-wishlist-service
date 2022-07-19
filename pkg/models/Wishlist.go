@@ -21,7 +21,7 @@ const (
 
 // Wishlist structure
 type Wishlist struct {
-	ID                  int              `json:"id"`
+	ID                  int              `json:"id" gorm:"primaryKey"`
 	UserID              int              `json:"user_id"`
 	CatalogID           int              `json:"catalog_id"`
 	CatalogName         string           `json:"catalog_name"`

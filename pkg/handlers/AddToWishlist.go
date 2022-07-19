@@ -5,20 +5,25 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/melvin2016/wishlist-service/pkg/mocks"
 	"github.com/melvin2016/wishlist-service/pkg/models"
 )
 
 // AddToWishlist adds an item to the wishlist array
-func AddToWishlist(c *gin.Context) {
+func (h Handler) AddToWishlist(c *gin.Context) {
 	var newWishlist models.Wishlist
 
-	if err := c.BindJSON(&newWishlist); err != nil {
+	// bind the data to variable
+	err := c.BindJSON(&newWishlist)
+	if err != nil {
 		log.Panic(err)
 		return
 	}
 
-	mocks.Wishlists = append(mocks.Wishlists, newWishlist)
+	// create a new wishlist
+	result := h.DB.Create(&newWishlist)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
 
 	c.IndentedJSON(http.StatusCreated, newWishlist)
 }

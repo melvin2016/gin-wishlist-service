@@ -1,15 +1,17 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/melvin2016/wishlist-service/pkg/mocks"
+	"github.com/melvin2016/wishlist-service/pkg/models"
 )
 
 // RemoveFromWishlist removes an item from the wishlist
-func RemoveFromWishlist(c *gin.Context) {
+func (h Handler) RemoveFromWishlist(c *gin.Context) {
+
 	// get the "id" from the request
 	params := c.Params
 	idstr, idFound := params.Get("id")
@@ -23,16 +25,18 @@ func RemoveFromWishlist(c *gin.Context) {
 		return
 	}
 
-	// check if the id is present
-	var idx int
-	for indx, val := range mocks.Wishlists {
-		if val.ID == id {
-			idx = indx
-		}
+	// find the wishlist that needs to be deleted
+	toDeleteWishlist := &models.Wishlist{}
+	if result := h.DB.Find(toDeleteWishlist, id); result.Error != nil {
+		log.Println(result.Error)
 	}
 
-	// remove the id specified from the array
-	mocks.Wishlists = append(mocks.Wishlists[:idx], mocks.Wishlists[idx+1:]...)
+	// delete wishlist matching id
+	deletedWishlist := models.Wishlist{}
+	if result := h.DB.Delete(&deletedWishlist, id); result.Error != nil {
+		log.Println(result.Error)
+	}
 
-	c.JSON(http.StatusOK, mocks.Wishlists)
+	// send response
+	c.JSON(http.StatusOK, toDeleteWishlist)
 }
